@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Contact Form</h1>
+
+<form method="POST" action="{{ url_for('contact') }}">
+    {{ form.csrf_token }}
+    <div class="form-group mb-3">
+        {{ form.full_name.label(class="form-label") }} 
+        {{ form.full_name(class="form-control") }}
+    </div>
+    <div class="form-group mb-3">
+        {{ form.email.label(class="form-label") }} 
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group mb-3">
+        {{ form.message.label(class="form-label") }} 
+        {{ form.message(class="form-control", rows=5, cols=20) }}
+    </div>
+
+    <p><button type="submit" class="btn btn-primary">Submit</button></p>
+</form>
+{% endblock %}
