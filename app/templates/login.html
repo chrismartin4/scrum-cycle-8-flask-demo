@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class='login-container'>
+    <h2>Login</h2>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('login') }}">
+        {{ form.csrf_token }}
+        <div class= "logcard">
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }} <br>
+                {{ form.email(class="form-control") }} <br>
+
+                {{ form.password.label(class="form-label") }} <br>
+                {{ form.password(class="form-control") }} <br>
+
+                <button class="btn btn-success" > Login </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

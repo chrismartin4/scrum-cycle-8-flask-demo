@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from app import app, db,login_manager
-from .forms import ContactForm
+from .forms import RegisterForm, LoginForm, EventForm
 from .models import User
 import datetime
 
@@ -66,9 +66,9 @@ def about():
 def profile(username=None):
     return render_template('profile.html', username=username)
 
-@app.route('/contact', methods=["GET", "POST"])
-def contact():
-    form = ContactForm()
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    form = RegisterForm()
 
     if form.validate_on_submit():
         full_name = form.full_name.data # or request.form['full_name']
@@ -86,7 +86,56 @@ def contact():
         app.logger.error(error)
         flash(error)
 
-    return render_template('contact_form.html', form=form)
+    return render_template('register.html', form=form)
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        full_name = form.full_name.data # or request.form['full_name']
+        email = form.email.data # or request.form['email']
+        message = form.message.data # or request.form['message']
+
+        #app.logger.debug(full_name)
+        dt=datetime.datetime.now()
+        acc=User(full_name=full_name,email=email,password=message,date=dt)
+        if acc is not None:
+            db.session.add(acc)
+            db.session.commit()
+
+    for error in form.email.errors:
+        app.logger.error(error)
+        flash(error)
+
+    return render_template('login.html', form=form)
+# user_loader callback. This callback is used to reload the user object from
+# the user ID stored in the session
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@app.route('/addevent', methods=["GET", "POST"])
+def addevent():
+    form = EventForm()
+
+    if form.validate_on_submit():
+        full_name = form.full_name.data # or request.form['full_name']
+        email = form.email.data # or request.form['email']
+        message = form.message.data # or request.form['message']
+
+        #app.logger.debug(full_name)
+        dt=datetime.datetime.now()
+        acc=User(full_name=full_name,email=email,password=message,date=dt)
+        if acc is not None:
+            db.session.add(acc)
+            db.session.commit()
+
+    for error in form.errors:
+        app.logger.error(error)
+        flash(error)
+
+    return render_template('addevent.html', form=form)
 
 @app.route('/api/tasks')
 def tasks():

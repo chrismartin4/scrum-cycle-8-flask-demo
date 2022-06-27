@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class='addevent-container'>
+    <h2>Add Event</h2>
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('addevent') }}">
+        {{ form.csrf_token }}
+        <div class= "addevent-card">
+            <div class="form-group">
+                {{ form.title.label(class="form-label") }} <br>
+                {{ form.title(class="form-control") }} <br>
+        
+                {{ form.start_date.label(class="form-label") }} <br>
+                {{ form.start_date(class="form-control") }} <br>
+
+                {{ form.end_date.label(class="form-label") }} <br>
+                {{ form.end_date(class="form-control") }} <br>
+
+                {{ form.desc.label(class="form-label") }} <br>
+                {{ form.desc(class="form-control") }} <br>
+
+                {{ form.venue.label(class="form-label") }} <br>
+                {{ form.venue(class="form-control") }} <br>
+
+                {{ form.flyer.label(class="form-label") }} <br>
+                {{ form.flyer(class="form-control-file") }} <br>
+
+                {{ form.website_url.label(class="form-label") }} <br>
+                {{ form.website_url(class="form-control") }} <br>
+
+            </div>
+        <div class="addeventbtn">
+            <button class="btn btn-success" > Submit </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
