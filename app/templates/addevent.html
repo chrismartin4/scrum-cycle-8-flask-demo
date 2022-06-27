@@ -10,13 +10,19 @@
             <div class="form-group">
                 {{ form.title.label(class="form-label") }} <br>
                 {{ form.title(class="form-control") }} <br>
-        
-                {{ form.start_date.label(class="form-label") }} <br>
-                {{ form.start_date(class="form-control") }} <br>
+                
+                <div class = "form-row">
+                    <div class = "col">
+                        {{ form.start_date.label(class="form-label") }} <br>
+                        {{ form.start_date(class="form-control", type="datetime-local") }} <br>
+                    </div>
 
-                {{ form.end_date.label(class="form-label") }} <br>
-                {{ form.end_date(class="form-control") }} <br>
-
+                    <div class = "col">
+                        {{ form.end_date.label(class="form-label") }} <br>
+                        {{ form.end_date(class="form-control", type="datetime-local") }} <br>
+                    </div>
+                </div>
+                
                 {{ form.desc.label(class="form-label") }} <br>
                 {{ form.desc(class="form-control") }} <br>
 
