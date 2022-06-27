@@ -1,7 +1,8 @@
 from flask import Flask, render_template, jsonify, flash
-from app import app
+from app import app, db
 from .forms import ContactForm
 from .models import User
+import datetime
 
 @app.route('/')
 def hello_world():
@@ -25,7 +26,12 @@ def contact():
         email = form.email.data # or request.form['email']
         message = form.message.data # or request.form['message']
 
-        app.logger.debug(full_name)
+        #app.logger.debug(full_name)
+        dt=datetime.datetime.now()
+        acc=User(full_name=full_name,email=email,password=message,date=dt)
+        if acc is not None:
+            db.session.add(acc)
+            db.session.commit()
 
     for error in form.email.errors:
         app.logger.error(error)
