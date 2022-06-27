@@ -10,7 +10,8 @@ import datetime
 @app.route('/hello')
 def hello_world():
     # example without a template
-    return 'Hello, World!'
+    # return 'Hello, World!'
+    return render_template('home.html')
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
