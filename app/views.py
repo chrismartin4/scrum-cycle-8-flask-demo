@@ -7,7 +7,8 @@ import datetime
 @app.route('/')
 def hello_world():
     # example without a template
-    return 'Hello, World!'
+    # return 'Hello, World!'
+    return render_template('home.html')
 
 @app.route('/about')
 def about():
