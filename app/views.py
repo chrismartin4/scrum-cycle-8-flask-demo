@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from app import app, db,login_manager
 from .forms import RegisterForm, LoginForm, EventForm
-from .models import User
+from .models import User,Events
 import datetime
 
 @app.route('/hello')
@@ -14,26 +14,28 @@ def hello_world():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    form = ContactForm()
+    form = RegisterForm()
     if request.method == "POST" and form.validate_on_submit():
             name=form.name.data
             email=form.email.data
             password=form.password.data
             pic=form.profile_photo.data
             role=form.role.data
-            date=datetime.datetime.now()
-            user = User(full_name=name, email=email,password=password,profile_photo=pic,role=role,date=date)
+            dt=datetime.datetime.now()
+            user = User(full_name=name, email=email,password=password,profile_photo=pic,role=role,date=dt)
             if user is not None :
                 db.session.add(user)
                 db.session.commit()
                 return redirect(url_for("login"))
-            else:
-                flash('User already exists ', 'danger')
+
+    for error in form.errors:
+        app.logger.error(error)
+        flash(error)
     return render_template("register.html", form=form)
 
 @app.route("/", methods=["GET", "POST"])
 def login():
-    form = ContactForm()
+    form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
         if form.email.data:
             email=form.email.data
@@ -41,13 +43,17 @@ def login():
             user = User.query.filter_by(email=email).first()
             if user is not None and check_password_hash(user.password,password):
                 login_user(user)
+                session['uid']=current_user.id
                 if user.role =="Admin":
                     session['is_admin'] = True
-                else:
+                elif user.role =="Regular":
                     session['is_regular'] = True
                 return redirect(url_for("about"))
             else:
                 flash('Email or Password is incorrect.', 'danger')
+    for error in form.errors:
+        app.logger.error(error)
+        flash(error)
     return render_template("login.html", form=form)
 
 @app.route("/logout")
@@ -57,6 +63,12 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'danger')
     return redirect(url_for('login'))
+    
+# user_loader callback. This callback is used to reload the user object from
+# the user ID stored in the session
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 @app.route('/about')
 def about():
@@ -66,71 +78,27 @@ def about():
 def profile(username=None):
     return render_template('profile.html', username=username)
 
-@app.route('/register', methods=["GET", "POST"])
-def register():
-    form = RegisterForm()
 
-    if form.validate_on_submit():
-        full_name = form.full_name.data # or request.form['full_name']
-        email = form.email.data # or request.form['email']
-        message = form.message.data # or request.form['message']
 
-        #app.logger.debug(full_name)
-        dt=datetime.datetime.now()
-        acc=User(full_name=full_name,email=email,password=message,date=dt)
-        if acc is not None:
-            db.session.add(acc)
-            db.session.commit()
 
-    for error in form.email.errors:
-        app.logger.error(error)
-        flash(error)
-
-    return render_template('register.html', form=form)
-
-@app.route('/login', methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-
-    if form.validate_on_submit():
-        full_name = form.full_name.data # or request.form['full_name']
-        email = form.email.data # or request.form['email']
-        message = form.message.data # or request.form['message']
-
-        #app.logger.debug(full_name)
-        dt=datetime.datetime.now()
-        acc=User(full_name=full_name,email=email,password=message,date=dt)
-        if acc is not None:
-            db.session.add(acc)
-            db.session.commit()
-
-    for error in form.email.errors:
-        app.logger.error(error)
-        flash(error)
-
-    return render_template('login.html', form=form)
-# user_loader callback. This callback is used to reload the user object from
-# the user ID stored in the session
-@login_manager.user_loader
-def load_user(id):
-    return User.query.get(int(id))
 
 @app.route('/addevent', methods=["GET", "POST"])
-def addevent():
+def event():
     form = EventForm()
-
-    if form.validate_on_submit():
-        full_name = form.full_name.data # or request.form['full_name']
-        email = form.email.data # or request.form['email']
-        message = form.message.data # or request.form['message']
-
+    if request.method == "POST" and form.validate_on_submit():
+        title=form.title.data
+        start_date=form.start_date.data
+        end_date=form.end_date.data
+        desc=form.desc.data
+        venue=form.venue.data
+        flyer=form.flyer.data
+        website_url=form.website_url.data
         #app.logger.debug(full_name)
         dt=datetime.datetime.now()
-        acc=User(full_name=full_name,email=email,password=message,date=dt)
-        if acc is not None:
-            db.session.add(acc)
+        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyer, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
+        if event is not None:
+            db.session.add(event)
             db.session.commit()
-
     for error in form.errors:
         app.logger.error(error)
         flash(error)
