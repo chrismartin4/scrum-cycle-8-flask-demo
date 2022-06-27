@@ -1,3 +1,463 @@
-main > .container {
-    padding-top: 60px;
+/* REGISTER PAGE */
+
+.register-container{
+	margin: auto;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+
+.regcard{
+	border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    width: 700px;
+	padding: 10px 20px;
+	margin-bottom: 50px;
+}
+
+.regcard button{
+	border-radius: 5px;
+    padding: 10px 195px;
+    text-decoration: none;
+    text-align: center;
+    margin: auto auto auto auto;
+    color: white;
+    text-transform: uppercase;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+}
+
+.regcard label{
+	color: rgb(65, 64, 64);
+	font-weight: bold;
+}
+
+.regcard .form-group{
+	font-size: large;
+	padding:30px;
+}
+
+.register-container h2{
+    padding-bottom: 25px;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+}
+
+.regbtn{
+	padding-bottom: 20px;
+}
+
+
+
+
+/* LOGIN PAGE */
+
+
+.login-container{
+	margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+}
+
+.login-container h2{
+	padding-bottom: 25px;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+}
+
+.logcard{
+	border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    width: 500px;
+	padding: 20px, 10px;
+}
+
+.logcard label{
+	padding: 10px;
+	color: rgb(65, 64, 64);
+	font-weight: bold;
+}
+
+.logcard .form-group{
+	font-size: large;
+	padding:30px;
+}
+
+.form-group button{
+    border-radius: 5px;
+    padding: 10px 195px;
+    text-decoration: none;
+    text-align: center;
+    margin: auto auto auto auto;
+    color: white;
+    text-transform: uppercase;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+}
+
+
+
+
+/* ADD EVENT PAGE */
+
+.addevent-container{
+	margin: auto;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.addevent-card{
+	border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    width: 700px;
+	padding: 10px 20px;
+	margin-bottom: 50px;
+}
+
+.addevent-card label{
+	color: rgb(65, 64, 64);
+	font-weight: bold;
+}
+
+.addevent-card .form-group{
+	font-size: large;
+	padding:30px;
+}
+
+.addevent-container h2{
+	padding-bottom: 25px;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+}
+
+.addevent-card button{
+	border-radius: 5px;
+    padding: 10px 195px;
+    text-decoration: none;
+    text-align: center;
+    margin: auto auto auto auto;
+    color: white;
+    text-transform: uppercase;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+
+}
+
+.addeventbtn{
+	padding-bottom: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+body {
+    padding-top: 5rem;
+    margin: 0;
+}
+
+.split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding: 100px;
+}
+
+
+  
+  /* Control the left side */
+  .left {
+    left: 0;
+    background-color:white;
+  }
+  
+  /* Control the right side */
+  .right {
+    right: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url('/static/redcar.jpg');
+  }
+  
+  /* If you want the content centered horizontally and vertically */
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  /* Style the image inside the centered container, if needed */
+  .centered img {
+    width: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+.carinfocard{
+    display:grid;
+    grid-template-columns: 370px 370px;
+    padding-top:100px;
+    margin-left:200px;
+}
+
+#car_img{
+    width:370px;
+    height:300px;
+}
+
+.allcarinfo{
+    background-color: white;
+    margin-right:100px;
+    width:450px;
+    padding-left:20px;
+}
+
+#favimg{
+    height: 20px;
+    width: 20px;
+}
+
+#alrfavimg{
+    height: 20px;
+    width: 20px;
+}
+
+
+.modelinfo{
+    font-weight: bold;
+    font-size: large;
+    color: gray;
+}
+
+.descriptiontype{
+    color: gray;
+}
+
+
+/* HOME PAGE */
+.middle{
+    position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 400px;
+	height: 350px;
+	padding: 80px 40px;
+	background: rgba(253, 253, 253, 0.7);
+    align-items: center;
+    justify-content: center;
+
+}
+
+.home-page::before{
+    width: 100%;
+	height: 100%;
+	content: "";
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: -1;
+	display: block;
+	filter: blur(2px);
+	background-position: center center;
+	background-repeat:no-repeat;
+	background-attachment: fixed;
+	-webkit-background-size: cover;
+	background-size: cover;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+
+.left h2{
+    margin: 0;
+	padding: 0 0 20px;
+	color: rgb(0, 0, 0);
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.left p {
+    margin: 0;
+	padding: 0;
+	color: gray;
+    text-align: center;
+}
+
+
+#reg_btn{
+    min-width:170px;
+    align-self: center;
+	margin-right: 0.5em;
+}
+
+#login_btn{
+    min-width:170px;
+}
+
+.btns {
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+
+
+
+
+/* EXPLORE PAGE */
+
+.explore-container{
+	margin: auto;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+#car_img{
+    object-fit: cover;
+    width: auto;
+}
+
+.explore-card{
+	border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    width: 860px;
+	padding: 10px 20px;
+	margin-bottom: 50px;
+}
+
+.explore-card button{
+	border-radius: 5px;
+    padding: 10px 195px;
+    text-decoration: none;
+    text-align: center;
+    margin: auto auto auto auto;
+    color: white;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+
+}
+
+.explore-btn{
+	padding-bottom: 20px;
+}
+
+.explore-card label{
+	color: rgb(65, 64, 64);
+	font-weight: bold;
+}
+
+.explore-card h2{
+	font-weight: bold;
+	padding-bottom: 20px;
+}
+
+li {
+	list-style-type: none;
+}
+
+.top-card{
+	display: flex;
+	justify-content: space-between;
+}
+
+.top-card p{
+	background-color: green;
+    padding: 10px;
+    border-radius: 25px;
+	color: white;
+    margin-top: -8px;
+}
+.top-card p img{
+    height: 20px;
+    width: 20px;
+}
+
+.explorecards{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 50px;
+    padding-bottom: 50px;
+}
+
+.usercard{
+    border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    
+
+    display:grid;
+    grid-template-columns: 370px 370px;
+    padding-top:50px;
+    padding-bottom:50px;
+    width: 860px;
+}
+
+#user_img{
+    height: 370px;
+    width: 370px;
+    object-fit: cover;
+    border-radius: 50%;
+    padding-left: 25px;
+}
+
+.alluserinfo{
+    background-color: white;
+    margin-right:100px;
+    width:370px;
+    padding-left:20px;
+}
+
+.myprofilepage{
+	margin: auto;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.allcarsfav h2{
+    margin-left: 40px;
+    padding: 10px;
 }
