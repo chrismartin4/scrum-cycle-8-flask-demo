@@ -136,7 +136,39 @@ def allEvents():
 def event_details(event_title):
     if request.method=="GET":
         try:
-            details= Events.query.filter_by(title=title).first()
+            details= Events.query.filter_by(title=event_title).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
+
+@app.route('/api/events/<start_date>',methods=["GET"])
+@login_required
+# @requires_auth
+def event_details(start_date):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(startdate=start_date).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
+
+@app.route('/api/events/<end_date>',methods=["GET"])
+@login_required
+# @requires_auth
+def event_details(end_date):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(enddate=end_date).first()
             if details is not None:
                 return make_response(jsonify(details=details),201)
             else:
