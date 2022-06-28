@@ -18,7 +18,7 @@ def hello_world():
 def register():
     form = RegisterForm()
     if request.method == "POST" and form.validate_on_submit():
-            name=form.name.data
+            name=form.full_name.data
             email=form.email.data
             password=form.password.data
             pic=form.profile_photo.data
@@ -88,7 +88,7 @@ def profile(username=None):
 
 
 @app.route('/addevent', methods=["GET", "POST"])
-def event():
+def addevent():
     form = EventForm()
     if request.method == "POST" and form.validate_on_submit():
         title=form.title.data
