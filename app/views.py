@@ -1,4 +1,5 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for, flash,g,send_from_directory,session
+from turtle import title
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash,g,send_from_directory,session,make_response
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -7,6 +8,8 @@ from .forms import RegisterForm, LoginForm, EventForm
 from .models import User,Events
 import datetime
 import os
+
+
 
 @app.route('/hello')
 def hello_world():
@@ -84,9 +87,6 @@ def profile(username=None):
     return render_template('profile.html', username=username)
 
 
-
-
-
 @app.route('/addevent', methods=["GET", "POST"])
 def addevent():
     form = EventForm()
@@ -111,6 +111,40 @@ def addevent():
         flash(error)
 
     return render_template('addevent.html', form=form)
+
+@app.route("/api/events", methods=["GET"])
+# @requires_auth
+def allEvents():
+    try:
+        events = []
+        allevents = db.session.query(Events).order_by(Events.id.desc()).all()
+
+        for event in allevents:                                      
+
+            record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+            events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+@app.route('/api/events/<event_title>',methods=["GET"])
+@login_required
+# @requires_auth
+def event_details(event_title):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(title=title).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
 
 @app.route('/api/tasks')
 def tasks():
