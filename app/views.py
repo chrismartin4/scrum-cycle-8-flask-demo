@@ -22,14 +22,14 @@ def register():
             email=form.email.data
             password=form.password.data
             pic=form.profile_photo.data
-            photo=secure_filename(pic.filename)
+            picfilename=secure_filename(pic.filename)
             role=form.role.data
             dt=datetime.datetime.now()
-            user = User(full_name=name, email=email,password=password,profile_photo=photo,role=role,date=dt)
+            user = User(full_name=name, email=email,password=password,profile_photo=picfilename,role=role,date=dt)
             if user is not None :
                 db.session.add(user)
                 db.session.commit()
-                pic.save(os.path.join(app.config['UPLOAD_FOLDER'],photo))
+                pic.save(os.path.join(app.config['UPLOAD_FOLDER'],picfilename))
                 return redirect(url_for("login"))
 
 
@@ -97,13 +97,15 @@ def addevent():
         desc=form.desc.data
         venue=form.venue.data
         flyer=form.flyer.data
+        flyerfilename=secure_filename(flyer.filename)
         website_url=form.website_url.data
         #app.logger.debug(full_name)
         dt=datetime.datetime.now()
-        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyer, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
+        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyerfilename, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
         if event is not None:
             db.session.add(event)
             db.session.commit()
+            flyer.save(os.path.join(app.config['UPLOAD_FOLDER'],flyerfilename))
     for error in form.errors:
         app.logger.error(error)
         flash(error)
