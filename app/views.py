@@ -117,7 +117,7 @@ def addevent():
 def allEvents():
     try:
         events = []
-        allevents = db.session.query(Events).order_by(Events.id.desc()).all()
+        allevents = db.session.query(Events).all()
 
         for event in allevents:                                      
 
@@ -149,7 +149,7 @@ def event_details(event_title):
 @app.route('/api/events/<start_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(start_date):
+def start_event(start_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(startdate=start_date).first()
@@ -165,7 +165,7 @@ def event_details(start_date):
 @app.route('/api/events/<end_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(end_date):
+def end_event(end_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(enddate=end_date).first()
