@@ -87,7 +87,7 @@ def profile(username=None):
     return render_template('profile.html', username=username)
 
 
-@app.route('/addevent', methods=["GET", "POST"])
+@app.route('/api/addevent', methods=["GET", "POST"])
 def addevent():
     form = EventForm()
     if request.method == "POST" and form.validate_on_submit():
@@ -117,12 +117,18 @@ def addevent():
 def allEvents():
     try:
         events = []
-        allevents = db.session.query(Events).order_by(Events.id.desc()).all()
+        allevents = db.session.query(Events).all()
 
-        for event in allevents:                                      
+        if session['is_admin'] == True:
+            for event in allevents:                                      
 
-            record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
-            events.append(record)
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
+        else:
+            for event in allevents:                                      
+                if event.status != "PENDING":
+                    record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                    events.append(record)
         return jsonify(events=events), 201
     except Exception as e:
         print(e)
@@ -133,7 +139,7 @@ def allEvents():
 @app.route('/api/events/<event_title>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details_title(event_title):
+def event_details(event_title):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(title=event_title).first()
@@ -149,7 +155,7 @@ def event_details_title(event_title):
 @app.route('/api/events/<start_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details_start(start_date):
+def start_event(start_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(startdate=start_date).first()
@@ -165,7 +171,7 @@ def event_details_start(start_date):
 @app.route('/api/events/<end_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details_end(end_date):
+def end_event(end_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(enddate=end_date).first()
