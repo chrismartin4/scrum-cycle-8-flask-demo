@@ -6,6 +6,7 @@ from app import app, db,login_manager
 from .forms import RegisterForm, LoginForm, EventForm
 from .models import User,Events
 import datetime
+import os
 
 @app.route('/hello')
 def hello_world():
@@ -21,13 +22,16 @@ def register():
             email=form.email.data
             password=form.password.data
             pic=form.profile_photo.data
+            photo=secure_filename(pic.filename)
             role=form.role.data
             dt=datetime.datetime.now()
-            user = User(full_name=name, email=email,password=password,profile_photo=pic,role=role,date=dt)
+            user = User(full_name=name, email=email,password=password,profile_photo=photo,role=role,date=dt)
             if user is not None :
                 db.session.add(user)
                 db.session.commit()
+                pic.save(os.path.join(app.config['UPLOAD_FOLDER'],photo))
                 return redirect(url_for("login"))
+
 
     for error in form.errors:
         app.logger.error(error)
