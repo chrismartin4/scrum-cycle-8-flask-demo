@@ -133,7 +133,7 @@ def allEvents():
 @app.route('/api/events/<event_title>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(event_title):
+def event_details_title(event_title):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(title=event_title).first()
@@ -149,7 +149,7 @@ def event_details(event_title):
 @app.route('/api/events/<start_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(start_date):
+def event_details_start(start_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(startdate=start_date).first()
@@ -165,7 +165,7 @@ def event_details(start_date):
 @app.route('/api/events/<end_date>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(end_date):
+def event_details_end(end_date):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(enddate=end_date).first()
