@@ -182,7 +182,7 @@ def addevent():
     for error in form.errors:
         app.logger.error(error)
         flash(error)
-    return jsonify(msg="event test")
+    return render_template("addevent.html", form=form)
 
 @app.route('/api/events/<event_id>', methods=['GET'])
 @requires_auth
@@ -221,8 +221,6 @@ def allEventsUser():
     try:
         events = []
         allevents = db.session.query(Events).all()
-
-        
         for event in allevents:                                      
             if event.status != "PENDING":
                 record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
@@ -230,7 +228,6 @@ def allEventsUser():
         return jsonify(events=events), 201
     except Exception as e:
         print(e)
-
         error = "Internal server error"
         return jsonify(error=error), 401
 
@@ -241,10 +238,7 @@ def allEventsAdmin():
     try:
         events = []
         allevents = db.session.query(Events).all()
-
-        
         for event in allevents:                                      
-
             record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
             events.append(record)
         return jsonify(events=events), 201
@@ -277,7 +271,7 @@ def pendingEvents():
 @app.route('/api/events/<event_title>',methods=["GET"])
 @login_required
 # @requires_auth
-def event_details(event_title):
+def event_details_title(event_title):
     if request.method=="GET":
         try:
             details= Events.query.filter_by(title=event_title).first()
