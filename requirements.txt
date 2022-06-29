@@ -27,3 +27,4 @@ WTForms==3.0.1
 zipp==3.8.0
 pymysql
 flask_mysqldb
+PyJWT
