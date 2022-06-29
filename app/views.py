@@ -87,7 +87,7 @@ def profile(username=None):
     return render_template('profile.html', username=username)
 
 
-@app.route('/api/addevent', methods=["GET", "POST"])
+@app.route('/api/event', methods=["GET", "POST"])
 def addevent():
     form = EventForm()
     if request.method == "POST" and form.validate_on_submit():
@@ -112,23 +112,58 @@ def addevent():
 
     return render_template('addevent.html', form=form)
 
-@app.route("/api/events", methods=["GET"])
+@app.route("/api/user/events", methods=["GET"])
 # @requires_auth
-def allEvents():
+def allEventsUser():
     try:
         events = []
         allevents = db.session.query(Events).all()
 
-        if session['is_admin'] == True:
-            for event in allevents:                                      
-
+        
+        for event in allevents:                                      
+            if event.status != "PENDING":
                 record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
                 events.append(record)
-        else:
-            for event in allevents:                                      
-                if event.status != "PENDING":
-                    record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
-                    events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+
+@app.route("/api/admin/events", methods=["GET"])
+# @requires_auth
+def allEventsAdmin():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        
+        for event in allevents:                                      
+
+            record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+            events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+
+
+@app.route("/api/pendingEvents", methods=["GET"])
+# @requires_auth
+def pendingEvents():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        for event in allevents:                                      
+            if event.status != "PENDING":
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
         return jsonify(events=events), 201
     except Exception as e:
         print(e)
@@ -183,6 +218,27 @@ def end_event(end_date):
             print(e)
             error="Internal server error"
             return make_response(jsonify(error=error)),401
+
+
+@app.route('/api/myevents',methods=["GET"])
+@login_required
+# @requires_auth
+def userEvents():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        for event in allevents:                                      
+            if event.uid == session['uid']:
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
+
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
 
 @app.route('/api/tasks')
 def tasks():
