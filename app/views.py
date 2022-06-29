@@ -1,4 +1,5 @@
-from flask import Flask, render_template, jsonify, make_response, request, redirect, url_for, flash,g,send_from_directory,session
+from turtle import title
+from flask import Flask, render_template, jsonify, request, redirect, url_for, flash,g,send_from_directory,session,make_response
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
@@ -53,12 +54,12 @@ def register():
             email=form.email.data
             password=form.password.data
             pic=form.profile_photo.data
-            photo=secure_filename(pic.filename)
+            picfilename=secure_filename(pic.filename)
             role=form.role.data
             dt=datetime.datetime.now()
             usercheck= User.query.filter_by(email=email).first()
             if usercheck is None :
-                user = User(full_name=name, email=email,password=password,profile_photo=photo,role=role,date=dt)
+                user = User(full_name=name, email=email,password=password,profile_photo=picfilename,role=role,date=dt)
                 db.session.add(user)
                 db.session.commit()
                 pic.save(os.path.join(app.config['UPLOAD_FOLDER'],photo))
@@ -132,12 +133,14 @@ def addevent():
         desc=form.desc.data
         venue=form.venue.data
         flyer=form.flyer.data
+        flyerfilename=secure_filename(flyer.filename)
         website_url=form.website_url.data
         dt=datetime.datetime.now()
-        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyer, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
+        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyerfilename, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
         if event is not None:
             db.session.add(event)
             db.session.commit()
+            flyer.save(os.path.join(app.config['UPLOAD_FOLDER'],flyerfilename))
             return make_response('Event Successfully registered.', 201)
         else:
             return make_response('Event already exists. Please Log in.', 202)
@@ -211,6 +214,134 @@ def user_events(user_id):
             allev.append(ev)
         return jsonify(allev=allev)
         #return render_template('addevent.html')
+
+@app.route("/api/user/events", methods=["GET"])
+# @requires_auth
+def allEventsUser():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        
+        for event in allevents:                                      
+            if event.status != "PENDING":
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+
+@app.route("/api/admin/events", methods=["GET"])
+# @requires_auth
+def allEventsAdmin():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        
+        for event in allevents:                                      
+
+            record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+            events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+
+
+@app.route("/api/pendingEvents", methods=["GET"])
+# @requires_auth
+def pendingEvents():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        for event in allevents:                                      
+            if event.status != "PENDING":
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
+
+@app.route('/api/events/<event_title>',methods=["GET"])
+@login_required
+# @requires_auth
+def event_details(event_title):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(title=event_title).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
+
+@app.route('/api/events/<start_date>',methods=["GET"])
+@login_required
+# @requires_auth
+def start_event(start_date):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(startdate=start_date).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
+
+@app.route('/api/events/<end_date>',methods=["GET"])
+@login_required
+# @requires_auth
+def end_event(end_date):
+    if request.method=="GET":
+        try:
+            details= Events.query.filter_by(enddate=end_date).first()
+            if details is not None:
+                return make_response(jsonify(details=details),201)
+            else:
+                return make_response(jsonify(response="Event not found"))
+        except Exception as e:
+            print(e)
+            error="Internal server error"
+            return make_response(jsonify(error=error)),401
+
+
+@app.route('/api/myevents',methods=["GET"])
+@login_required
+# @requires_auth
+def userEvents():
+    try:
+        events = []
+        allevents = db.session.query(Events).all()
+
+        for event in allevents:                                      
+            if event.uid == session['uid']:
+                record = {"photo": os.path.join(app.config['GET_FILE'], event.photo), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
+                events.append(record)
+
+        return jsonify(events=events), 201
+    except Exception as e:
+        print(e)
+
+        error = "Internal server error"
+        return jsonify(error=error), 401
 
 @app.route('/api/tasks')
 def tasks():
