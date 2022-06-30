@@ -22,3 +22,8 @@ class EventForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[Email()])
     password = PasswordField('Password', validators=[InputRequired()])
+class searchForm(FlaskForm):
+    title = StringField('Event Title',default="", validators=[])
+    start_date = DateTimeLocalField('Start Date and Time',default="" ,format='%Y-%m-%dT%H:%M' ,validators=[])
+    end_date = DateTimeLocalField('End Date and Time',default="", format='%Y-%m-%dT%H:%M', validators=[])
+    

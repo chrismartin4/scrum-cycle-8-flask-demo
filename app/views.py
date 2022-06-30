@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from app import app, db,login_manager
-from .forms import RegisterForm, LoginForm, EventForm
+from .forms import RegisterForm, LoginForm, EventForm,searchForm
 from .models import User,Events
 import datetime
 import os
@@ -295,7 +295,7 @@ def event():
             flyer.save(os.path.join(app.config['UPLOAD_FOLDER'],flyerfilename))
             return jsonify('Event Successfully registered.'),201
         else:
-            return jsonify('Event already exists. Please Log in.'),202
+            return jsonify('Event already exists.'),202
     if request.method=="GET":
         allev=[]
         if session['is_admin']== True:
@@ -330,7 +330,7 @@ def event():
                 ev["uid"]=e.uid
                 ev["created_at"]=e.created_at
                 allev.append(ev)
-        return jsonify(allev=allev)  
+        return jsonify(allev=allev),200  
     
 
 @app.route('/api/events/<event_id>', methods=['GET','PATCH','PUT','DELETE'])
@@ -346,14 +346,12 @@ def event_details(event_id):
         if session['is_admin']== True:
             e.status='Published'
             db.session.commit()
-            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully Published.',Event=e),201
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully Published.',Event=e),200
         else:
-            return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),202
+            return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),401
     if request.method == 'PUT':
         if session['is_admin']== True or session['uid']==e.uid:
             e.title=form.title.data
-            e.start_date=form.start_date.data
-            e.end_date=form.end_date.data
             e.desc=form.desc.data
             e.venue=form.venue.data
             flyer=form.flyer.data
@@ -362,9 +360,9 @@ def event_details(event_id):
             e.status=e.status
             e.created_at=e.created_at
             db.session.commit()
-            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully updated.'),201
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully updated.'),200
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may update this event.'),202
+            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may update this event.'),401
     if request.method == 'DELETE':
         if session['is_admin']== True or session['uid']==e.uid:
             e=Events.query.filter_by(id=event_id).first()
@@ -372,7 +370,7 @@ def event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully deleted.')
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may delete this event.'),202
+            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may delete this event.'),401
 
 
 
@@ -398,7 +396,32 @@ def user_events(user_id):
             ev["created_at"]=e.created_at
             allev.append(ev)
         return jsonify(allev=allev)
-        #return render_template('addevent.html')
+
+@app.route('/api/events/search', methods=["GET","POST"])
+@requires_auth
+def events_search():
+    form=searchForm()
+    searchEvents=[]
+    if request.method=="POST":  
+        start_date=form.start_date.data
+        end_date=form.start_date.data
+        title="%{}%".format(form.title.data)
+        search_results= Events.query.filter((Events.title.like(title)|Events.start_date.is_(start_date)|Events.end_date.is_(end_date)))
+        for e in search_results:
+            ev={}
+            ev['Event_id']=e.id
+            ev['title']=e.title
+            ev["start_date"]=e.start_date
+            ev["end_date"]=e.end_date        
+            ev["desc"]=e.desc
+            ev["venue"]=e.venue
+            ev["flyer"]=e.flyer
+            ev["website_url"]=e.website_url
+            ev["status"]=e.status
+            ev["uid"]=e.uid
+            ev["created_at"]=e.created_at
+            searchEvents.append(ev)
+        return jsonify(searchEvents=searchEvents)
 
 
 @app.route("/api/events/pending", methods=["GET"])
@@ -418,7 +441,7 @@ def pendingEvents():
         return jsonify(error=error), 401
 
 @app.route('/api/events/<event_title>',methods=["GET"])
-# @requires_auth
+@requires_auth
 def event_details_title(event_title):
     if request.method=="GET":
         try:
