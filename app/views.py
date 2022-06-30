@@ -427,7 +427,7 @@ def events_search():
 @app.route("/api/events/pending", methods=["GET"])
 # @requires_auth
 def pendingEvents():
-    if session['is_admin']=True:
+    if session['is_admin']==True:
             events=[]
             evlist=Events.query.filter_by(status="Pending").all()
             for e in evlist:
