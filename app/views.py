@@ -427,18 +427,26 @@ def events_search():
 @app.route("/api/events/pending", methods=["GET"])
 # @requires_auth
 def pendingEvents():
-    try:
-        events = []
-        allevents = db.session.query(Events).all()
-        for event in allevents:                                      
-            if event.status == "Pending":
-                record = {"flyer": os.path.join(app.config['UPLOAD_FOLDER'], event.flyer), "title": event.title, "Start Date": event.start_date,"End Date": event.end_date, "Description":event.desc, "Venue":event.venue }
-                events.append(record)
-        return jsonify(events=events), 201
-    except Exception as e:
-        print(e)
-        error = "Internal server error"
-        return jsonify(error=error), 401
+    if session['is_admin']=True:
+            events=[]
+            evlist=Events.query.filter_by(status="Pending").all()
+            for e in evlist:
+                ev={}
+                ev['Event_id']=e.id
+                ev['title']=e.title
+                ev["start_date"]=e.start_date
+                ev["end_date"]=e.end_date        
+                ev["desc"]=e.desc
+                ev["venue"]=e.venue
+                ev["flyer"]=e.flyer
+                ev["website_url"]=e.website_url
+                ev["status"]=e.status
+                ev["uid"]=e.uid
+                ev["created_at"]=e.created_at
+                events.append(ev)
+            return jsonify(events=events), 200
+    else:
+        return jsonify(msg='User is not an Admin. Please Log in as Admin to view pending events.'),401
 
 @app.route('/api/events/<event_title>',methods=["GET"])
 @requires_auth
