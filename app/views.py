@@ -262,10 +262,12 @@ def api_login():
                 #return redirect(url_for("about"))
             else:
                 flash('Email or Password is incorrect.', 'danger')
+    err=[]
     for error in form.errors:
         app.logger.error(error)
         flash(error)
-    return render_template("login.html", form=form)
+        err.append(error)
+    return jsonify(errors=err)
 
 @app.route("/api/logout")
 @requires_auth
