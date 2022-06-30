@@ -350,9 +350,10 @@ body {
 	flex-direction: column;
 }
 
-#car_img{
+.card-img-top{
     object-fit: cover;
-    width: auto;
+    height: 150px;
+    width: 150px;
 }
 
 .explore-card{

@@ -137,7 +137,7 @@ def viewevent():
             evlist=Events.query.order_by(Events.id).all()
         elif session['is_admin']== False:
             evlist=Events.query.filter_by(status="Published").all()
-    return render_template("addevent.html",evlist=evlist)
+    return render_template("viewevents.html",evlist=evlist)
 
 @app.route("/web/events/pending", methods=["GET"])
 @login_required
@@ -155,6 +155,11 @@ def web_user_events(user_id):
         evlist=Events.query.filter_by(uid=session['uid']).all()
         return render_template("addevent.html",evlist=evlist)
 
+@app.route("/outputs/<filename>")
+def get_image(filename):
+    root_dir = os.getcwd()
+    return send_from_directory(os.path.join(root_dir, app.config['UPLOAD_FOLDER']), filename)
+
 @app.route('/web/events/<event_id>/', methods=['GET','PATCH','PUT','DELETE'])
 @requires_auth
 def web_event_details(event_id):
@@ -170,7 +175,7 @@ def web_event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event '+e.title+' Successfully Published.',Event=e),201
         else:
-            return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),202
+            return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),401
     if request.method == 'PUT':
         if session['is_admin']== True or session['uid']==e.uid:
             e.title=form.title.data
@@ -184,7 +189,7 @@ def web_event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event '+e.title+' Successfully updated.',updatedEvent=e),201
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may update this event.'),202
+            return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may update this event.'),401
     if request.method == 'DELETE':
         if session['is_admin']== True or session['uid']==e.uid:
             e=Events.query.filter_by(id=event_id).first()
@@ -192,7 +197,7 @@ def web_event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event '+e.title+' Successfully deleted.')
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may delete this event.'),202
+            return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may delete this event.'),401
 
 
 @app.route('/web/about')
@@ -227,8 +232,7 @@ def api_register():
                 #return redirect(url_for("login"))
                 return jsonify(message="User "+name+' Successfully registered. Please Log in.'), 201
             else:
-        # returns 202 if user already exists
-                return jsonify(message='User already exists. Please Log in.'), 202
+                return jsonify(message='User already exists. Please Log in.'), 409
     err=[]
     for error in form.errors:
         app.logger.error(error)
@@ -270,12 +274,12 @@ def logout():
     session.pop('uid', None)
     session.pop('is_admin', None)
     session.pop('is_regular', None)
-    flash('You were logged out', 'success')
-    return redirect(url_for('login'))
+    return jsonify('You were logged out succesfully.'),200
 
 
 
 @app.route('/api/events', methods=["GET", "POST"])
+@requires_auth
 def event():
     form = EventForm()
     if request.method == "POST" :
@@ -295,7 +299,7 @@ def event():
             flyer.save(os.path.join(app.config['UPLOAD_FOLDER'],flyerfilename))
             return jsonify('Event Successfully registered.'),201
         else:
-            return jsonify('Event already exists.'),202
+            return jsonify('Event already exists.'),409
     if request.method=="GET":
         allev=[]
         if session['is_admin']== True:
@@ -362,7 +366,7 @@ def event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully updated.'),200
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may update this event.'),401
+            return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may update this event.'),401
     if request.method == 'DELETE':
         if session['is_admin']== True or session['uid']==e.uid:
             e=Events.query.filter_by(id=event_id).first()
@@ -370,7 +374,7 @@ def event_details(event_id):
             db.session.commit()
             return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully deleted.')
         else:
-            return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may delete this event.'),401
+            return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may delete this event.'),401
 
 
 

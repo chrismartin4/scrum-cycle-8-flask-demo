@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class='explore-container'>
+    <h2>Events</h2>
+
+    <div class="form-inline d-flex justify-content-center">
+        <div class="form-group mx-sm-3 mb-2">
+          <label class="sr-only" for="search">Search</label>
+          <input type="search" name="search" id="search" class="form-control mb-2 mr-sm-2" placeholder="Enter search term here" />
+          <button class="btn btn-primary mb-2">Search</button>
+        </div>
+    </div>
+
+      <br>
+    <div class="explorecards">
+        <ul> 
+            {% for event in evlist %} 
+            <div class="card">
+                <img class="card-img-top" src="{{ url_for('get_image',filename=event.flyer) }}" alt="Card image cap">
+                <div class="card-body">
+                <p class="card-text">{{event.start_date}}</p>
+                <p class="card-text">{{event.end_date}}</p>   
+                <h5 class="card-title">{{event.title}}</h5>
+                <p class="card-text">{{event.venue}}</p>
+                <p class="card-text">{{event.desc}}</p>
+                <p class="card-text">{{event.website_url}}</p>
+                <!-- <div class="card-footer">
+                    <small class="text-muted">Last updated 3 mins ago</small>
+                </div> -->
+            </div>
+            {% endfor %} 
+        </ul>
+        
+    </div>
+
+</div>
+
+
+{% endblock %}
