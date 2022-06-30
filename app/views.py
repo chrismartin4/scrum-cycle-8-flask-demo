@@ -346,7 +346,7 @@ def event_details(event_id):
         if session['is_admin']== True:
             e.status='Published'
             db.session.commit()
-            return jsonify(msg='Event ID: '+e.id +"Title: "+e.title+' Successfully Published.',Event=e),201
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully Published.',Event=e),201
         else:
             return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),202
     if request.method == 'PUT':
@@ -362,7 +362,7 @@ def event_details(event_id):
             e.status=e.status
             e.created_at=e.created_at
             db.session.commit()
-            return jsonify(msg='Event ID: '+e.id +"Title: "+e.title+' Successfully updated.',updatedEvent=e),201
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully updated.'),201
         else:
             return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may update this event.'),202
     if request.method == 'DELETE':
@@ -370,7 +370,7 @@ def event_details(event_id):
             e=Events.query.filter_by(id=event_id).first()
             db.session.delete(e)
             db.session.commit()
-            return jsonify(msg='Event ID: '+e.id +"Title: "+e.title+' Successfully deleted.')
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully deleted.')
         else:
             return jsonify(msg='User is not an Admin or the creator of this event. Only admins and the creator may delete this event.'),202
 
