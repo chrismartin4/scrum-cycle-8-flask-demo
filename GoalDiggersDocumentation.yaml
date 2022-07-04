@@ -1,0 +1,445 @@
+openapi: 3.0.1
+info:
+  title: Event Pro
+  version: 1.0.0
+  description: This is the API for Event Pro, an Events Management System. It is an Events Manager System which allows users to create, view, edit and delete their event. This events must be approved by an admin before being published. After the event is published, all users will be able to view all events or search for these by title and date. 
+servers:
+  - url: 'https://localhost:8080'
+paths:
+  '/api/register':
+    summary: Register a new user
+    post:
+      summary: Registers a new user
+      description: ''
+      operationId: api_register
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/Users'
+            examples:
+              user-registration:
+                $ref: '#/components/examples/user'
+      responses:
+        '201':
+          description: User Successfully registered. Please Log in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+              examples:
+                user:
+                  $ref: '#/components/examples/user'
+        '409':
+          description: User already exists. Please Log in.
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "User already exists. Please Log in."
+      tags:
+        - register
+        
+  '/api/login':
+    summary: Authenticate a user
+    description: When a user is authenticated a JWT token should also be generated
+    post:
+      summary: Login a user
+      description: ''
+      operationId: api_login
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string          
+      responses:
+        '200':
+          description: User logs in and token is generated
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Login Successful and Token was Generated"
+      tags:
+        - login
+        
+
+          
+  '/api/logout':
+    summary: Authenticate a user
+    description: Logout an authenticated user
+    post:
+      summary: Logout a user
+      description: ''
+      operationId: authLogout
+      security:
+        - BearerAuth: []
+      # parameters:
+      #   - in: header
+      #     name: security
+      #     schema:
+      #       $ref: '#/components/headers/Authorization'
+      #     required: true
+      responses:
+        200:
+          description: You were logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Log out successful"
+      tags:
+        - logout
+        
+
+  '/api/events':
+    summary: Events that have been approved
+    get:
+      summary: List all upcoming events   
+      description: ''
+      operationId: event
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lists all events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Events'
+      tags:
+        - events
+    post:
+      summary: Add a new event
+      description: ''
+      operationId: addEvent
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Events' 
+            examples:
+              new-event:
+                $ref: '#/components/examples/event'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Event Successfully registered."
+        '304':
+          description: Event already exists
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Event already exists. Please Log in."
+      tags:
+        - events
+        
+  '/api/events/{event_id}':
+    summary: CRUD Operations on a particular event
+    get:
+      summary: View an event 
+      description: ''
+      operationId: event_details
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          description: The unique id of the event
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Individual Event details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Events'
+      tags:
+        - events
+    patch:
+      summary: Admin approves pending events
+      description: ''
+      operationId: event_status
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          description: The unique id of the event
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Event status changed.
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully Published."
+        '401':
+          description: Event status cannot be changed.
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "User is not an Admin. Please Log in as Admin to Publish events."
+      tags:
+        - events
+    put:
+      summary: Edit an event 
+      description: ''
+      operationId: edit_event
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          description: Update the details of an event.
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Details of the event updated
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully updated."
+        '401':
+          description: Details cannot be changed.
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "User is not an Admin nor the creator of this event. Only admins and the creator may update this event."
+      tags:
+        - events
+        
+    delete:
+      summary: Delete an event 
+      description: ''
+      operationId: delete_event
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          description: The unique id of the event
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Individual Event details
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully deleted."
+        '401':
+          description: Event status cannot be changed.
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "User is not an Admin or the creator of this event. Only admins and the creator may delete this event."
+      tags:
+        - events
+        
+        
+  '/api/events/user/{user_id}':
+    summary: Display the events created by a particular user
+    description: ''
+    get:
+      summary: Show the events for a particular user
+      description: ''
+      operationId: userEvent
+      parameters:
+        - in: path
+          name: user_id
+          description: The unique id of a user
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Events created by a particular user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Events'
+      tags:
+        - user, events
+        
+  '/api/events/pending':
+    summary: Displays the pending events
+    description: ''
+    get:
+      summary: Display pending events
+      description: ''
+      operationId: pending
+      responses:
+        200:
+          description: A list of pending events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Events'
+      tags:
+        - events
+        
+  '/api/events/search':
+    summary: Display the event with the respective title and date
+    description: ''
+    get:
+      summary: Display event by title and date
+      description: ''
+      operationId: e_by_title_date
+      responses:
+        200:
+          description: Events based on the title and date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Events'
+      tags:
+        - events
+    
+components:
+  schemas:
+    Events:
+      type: object
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        title:
+          type: "string"
+        start_date:
+          type: "string"
+          format: "date-time"
+        end_date:
+          type: "string"
+          format: "date-time"
+        description:
+          type: "string"
+        venue:
+          type: "string"
+        flyer:
+          type: "string"
+        website_url:
+          type: "string"
+        status:
+          type: "string"
+        uid:
+          type: "integer"
+          format: "int64"
+        created_at:
+          type: "string"
+          format: "date-time"
+    Users:
+        type: object
+        properties:
+         id:
+          type: "integer"
+          format: "int64"
+         full_name:
+          type: "string"
+         email:
+          type: "string"
+         password:
+          type: "string"
+         profile_photo:
+          type: "string"
+         role:
+          type: "string"
+         created_at:
+          type: "string"
+          format: "date-time"
+          
+  examples:
+    event:
+      value:
+        id: 1
+        title: 'Test Event'
+        start_date: 'Thu, 28 Apr 2022 17:59:00 GMT'
+        end_date: 'Tue, 28 Jun 2022 22:09:00 GMT'
+        description: 'My first event ever.'
+        venue: 'Hope Gardens'
+        flyer: 'transparent-person-stock-photo-person-with-thumbs-up-11562979879tg1imywqhq.png'
+        website_url: 'https://www.google.com/'
+        status: 'Pending'
+        uid: '2'
+        created_at: 'Tue, 28 Jun 2022 22:10:12 GMT'
+  
+    user:
+      value:
+        id: 1
+        full_name: 'Danica Patrick'
+        email: 'dpatrick@example.com'
+        password: 'password'
+        profile_photo: 'http://localhost/images/photo.jpg'
+        role: 'User'
+        created_at: '2021-04-05 17:53:00'
+        
+    login:
+      value:
+        username: 'dpatrick@example.com'
+        password: 'password'
+        
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
