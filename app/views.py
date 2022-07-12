@@ -36,7 +36,6 @@ def requires_auth(f):
             return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
         g.current_user = user = payload
         return f(*args, **kwargs)
-
     return decorated
 
 
@@ -82,7 +81,7 @@ def login():
                     session['is_admin'] = True
                 elif user.role =="Regular":
                     session['is_admin'] = False
-                return redirect(url_for("about"))
+                return redirect(url_for("addevent"))
             else:
                 flash('Email or Password is incorrect.', 'danger')
     for error in form.errors:
@@ -209,9 +208,13 @@ def about():
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
-       
+
+
+
+
+
 ####################################################     API  ##############################################################################
-@app.route("/api/register", methods=["POST"])
+@app.route("/api/v1/register", methods=["POST"])
 def api_register():
     form = RegisterForm()
     #if request.method == "POST" and form.validate_on_submit():
@@ -241,7 +244,7 @@ def api_register():
     return jsonify(msg="register errors",err=err)
     #return render_template("register.html", form=form)
 
-@app.route("/api/login", methods=["GET", "POST"])
+@app.route("/api/v1/login", methods=["GET", "POST"])
 def api_login():
     form = LoginForm()
     if request.method == "POST" :
@@ -250,16 +253,11 @@ def api_login():
             password=form.password.data
             user = User.query.filter_by(email=email).first()
             if user is not None and check_password_hash(user.password,password):
-                payload = { 'email': user.email,'userid': user.id}
+                payload = { 'email': user.email,'userid': user.id,'role':user.role}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+                #token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
                 jsonmsg=jsonify(message=" Login Successful and Token was Generated",data={"token":token})
-                session['uid']=user.id
-                if user.role =="Admin":
-                    session['is_admin'] = True
-                elif user.role =="Regular":
-                    session['is_admin'] = False
-                return jsonmsg
-                #return redirect(url_for("about"))
+                return jsonmsg,200
             else:
                 flash('Email or Password is incorrect.', 'danger')
     err=[]
@@ -269,18 +267,15 @@ def api_login():
         err.append(error)
     return jsonify(errors=err)
 
-@app.route("/api/logout")
+@app.route("/api/v1/logout")
 @requires_auth
 def logout():
     # Logout the user and end the session
-    session.pop('uid', None)
-    session.pop('is_admin', None)
-    session.pop('is_regular', None)
     return jsonify('You were logged out succesfully.'),200
 
 
 
-@app.route('/api/events', methods=["GET", "POST"])
+@app.route('/api/v1/events', methods=["GET", "POST"])
 @requires_auth
 def event():
     form = EventForm()
@@ -304,7 +299,7 @@ def event():
             return jsonify('Event already exists.'),409
     if request.method=="GET":
         allev=[]
-        if session['is_admin']== True:
+        if g.current_user['role']=='Admin':
             evlist=Events.query.order_by(Events.id).all()
             for e in evlist:
                 ev={}
@@ -320,7 +315,7 @@ def event():
                 ev["uid"]=e.uid
                 ev["created_at"]=e.created_at
                 allev.append(ev)
-        elif session['is_admin']== False:
+        elif g.current_user['role']=='Regular':
             evlist=Events.query.filter_by(status="Published").all()
             for e in evlist:
                 ev={}
@@ -339,7 +334,7 @@ def event():
         return jsonify(allev=allev),200  
     
 
-@app.route('/api/events/<event_id>', methods=['GET','PATCH','PUT','DELETE'])
+@app.route('/api/v1/events/<event_id>', methods=['GET','PATCH','PUT','DELETE'])
 @requires_auth
 def event_details(event_id):
     form = EventForm()
@@ -349,14 +344,14 @@ def event_details(event_id):
         venue=e.venue, flyer=e.flyer, website_url=e.website_url,
         status=e.status, uid=e.uid, created_at=e.created_at)
     if request.method == 'PATCH':
-        if session['is_admin']== True:
+        if g.current_user['role']=='Admin':
             e.status='Published'
             db.session.commit()
-            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully Published.',Event=e),200
+            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully Published.'),200
         else:
             return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),401
     if request.method == 'PUT':
-        if session['is_admin']== True or session['uid']==e.uid:
+        if g.current_user['role']=='Admin' or g.current_user['uid']==e.uid:
             e.title=form.title.data
             e.desc=form.desc.data
             e.venue=form.venue.data
@@ -370,18 +365,21 @@ def event_details(event_id):
         else:
             return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may update this event.'),401
     if request.method == 'DELETE':
-        if session['is_admin']== True or session['uid']==e.uid:
+        if g.current_user['role']=='Admin' or g.current_user['uid']==e.uid:
             e=Events.query.filter_by(id=event_id).first()
-            db.session.delete(e)
-            db.session.commit()
-            return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully deleted.')
+            if e is not None:
+                db.session.delete(e)
+                db.session.commit()
+                return jsonify(msg='Event ID: '+str(e.id) +" Title: "+e.title+' Successfully deleted.')
+            else:
+                return jsonify(msg='This Event does not exist or has aleady been deleted'),409
         else:
             return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may delete this event.'),401
 
 
 
 
-@app.route('/api/events/user/<user_id>', methods=["GET"])
+@app.route('/api/v1/events/user/<user_id>', methods=["GET"])
 @requires_auth
 def user_events(user_id):
     if request.method=="GET":
@@ -403,7 +401,7 @@ def user_events(user_id):
             allev.append(ev)
         return jsonify(allev=allev)
 
-@app.route('/api/events/search', methods=["GET","POST"])
+@app.route('/api/v1/events/search', methods=["GET","POST"])
 @requires_auth
 def events_search():
     form=searchForm()
@@ -430,10 +428,10 @@ def events_search():
         return jsonify(searchEvents=searchEvents)
 
 
-@app.route("/api/events/pending", methods=["GET"])
+@app.route("/api/v1/events/pending", methods=["GET"])
 # @requires_auth
 def pendingEvents():
-    if session['is_admin']==True:
+    if g.current_user['role']=='Admin':
             events=[]
             evlist=Events.query.filter_by(status="Pending").all()
             for e in evlist:
@@ -454,19 +452,9 @@ def pendingEvents():
     else:
         return jsonify(msg='User is not an Admin. Please Log in as Admin to view pending events.'),401
 
-@app.route('/api/events/<event_title>',methods=["GET"])
+
+
+@app.route("/api/v1/test", methods=["GET"])
 @requires_auth
-def event_details_title(event_title):
-    if request.method=="GET":
-        try:
-            details= Events.query.filter_by(title=event_title).first()
-            if details is not None:
-                return make_response(jsonify(details=details),201)
-            else:
-                return make_response(jsonify(response="Event not found"))
-        except Exception as e:
-            print(e)
-            error="Internal server error"
-            return make_response(jsonify(error=error)),401
-
-
+def test():
+    return g.current_user['role']

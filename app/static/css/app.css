@@ -420,6 +420,9 @@ li {
     column-gap: 20px;
     row-gap: 50px;
     padding-bottom: 50px;
+    justify-content: center;
+    margin-left:375px;
+    margin-right:-350px;
 }
 
 .usercard{
