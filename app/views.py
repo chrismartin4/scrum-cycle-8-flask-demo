@@ -215,6 +215,7 @@ def load_user(id):
 
 ####################################################     API  ##############################################################################
 @app.route("/api/v1/register", methods=["POST"])
+
 def api_register():
     form = RegisterForm()
     #if request.method == "POST" and form.validate_on_submit():
@@ -256,7 +257,7 @@ def api_login():
                 payload = { 'email': user.email,'userid': user.id,'role':user.role}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
                 #token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-                jsonmsg=jsonify(message=" Login Successful and Token was Generated",data={"token":token})
+                jsonmsg=jsonify(message=" Login Successful and Token was Generated",token=token)
                 return jsonmsg,200
             else:
                 flash('Email or Password is incorrect.', 'danger')
@@ -289,7 +290,7 @@ def event():
         flyerfilename=secure_filename(flyer.filename)
         website_url=form.website_url.data
         dt=datetime.datetime.now()
-        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyerfilename, website_url=website_url, status="Pending", uid=session['uid'], created_at=dt)
+        event=Events(title=title, start_date=start_date, end_date=end_date, desc=desc, venue=venue, flyer=flyerfilename, website_url=website_url, status="Pending", uid=g.current_user['userid'], created_at=dt)
         if event is not None:
             db.session.add(event)
             db.session.commit()
@@ -351,7 +352,7 @@ def event_details(event_id):
         else:
             return jsonify(msg='User is not an Admin. Please Log in as Admin to Publish events.'),401
     if request.method == 'PUT':
-        if g.current_user['role']=='Admin' or g.current_user['uid']==e.uid:
+        if g.current_user['role']=='Admin' or g.current_user['userid']==e.uid:
             e.title=form.title.data
             e.desc=form.desc.data
             e.venue=form.venue.data
@@ -365,7 +366,7 @@ def event_details(event_id):
         else:
             return jsonify(msg='User is not an Admin nor the creator of this event. Only admins and the creator may update this event.'),401
     if request.method == 'DELETE':
-        if g.current_user['role']=='Admin' or g.current_user['uid']==e.uid:
+        if g.current_user['role']=='Admin' or g.current_user['userid']==e.uid:
             e=Events.query.filter_by(id=event_id).first()
             if e is not None:
                 db.session.delete(e)
@@ -401,6 +402,19 @@ def user_events(user_id):
             allev.append(ev)
         return jsonify(allev=allev)
 
+@app.route('/api/v1/profile', methods=["GET"])
+@requires_auth
+def user_details():
+    if request.method=="GET":
+        u = User.query.filter_by(id=g.current_user['userid']).first()
+        usp={}
+        usp['user_id']=u.id
+        usp['full_name']=u.full_name
+        usp["email"]=u.email
+        usp["profile_photo"]=u.profile_photo        
+        usp["role"]=u.role
+        return jsonify(profile=usp)
+
 @app.route('/api/v1/events/search', methods=["GET","POST"])
 @requires_auth
 def events_search():
@@ -429,7 +443,7 @@ def events_search():
 
 
 @app.route("/api/v1/events/pending", methods=["GET"])
-# @requires_auth
+@requires_auth
 def pendingEvents():
     if g.current_user['role']=='Admin':
             events=[]

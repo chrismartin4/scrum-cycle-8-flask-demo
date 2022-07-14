@@ -28,3 +28,4 @@ zipp==3.8.0
 pymysql
 flask_mysqldb
 PyJWT
+Flask-CORS
