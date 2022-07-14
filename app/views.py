@@ -300,38 +300,21 @@ def event():
             return jsonify('Event already exists.'),409
     if request.method=="GET":
         allev=[]
-        if g.current_user['role']=='Admin':
-            evlist=Events.query.order_by(Events.id).all()
-            for e in evlist:
-                ev={}
-                ev['Event_id']=e.id
-                ev['title']=e.title
-                ev["start_date"]=e.start_date
-                ev["end_date"]=e.end_date        
-                ev["desc"]=e.desc
-                ev["venue"]=e.venue
-                ev["flyer"]=e.flyer
-                ev["website_url"]=e.website_url
-                ev["status"]=e.status
-                ev["uid"]=e.uid
-                ev["created_at"]=e.created_at
-                allev.append(ev)
-        elif g.current_user['role']=='Regular':
-            evlist=Events.query.filter_by(status="Published").all()
-            for e in evlist:
-                ev={}
-                ev['Event_id']=e.id
-                ev['title']=e.title
-                ev["start_date"]=e.start_date
-                ev["end_date"]=e.end_date        
-                ev["desc"]=e.desc
-                ev["venue"]=e.venue
-                ev["flyer"]=e.flyer
-                ev["website_url"]=e.website_url
-                ev["status"]=e.status
-                ev["uid"]=e.uid
-                ev["created_at"]=e.created_at
-                allev.append(ev)
+        evlist=Events.query.filter_by(status="Published").all()
+        for e in evlist:
+            ev={}
+            ev['Event_id']=e.id
+            ev['title']=e.title
+            ev["start_date"]=e.start_date
+            ev["end_date"]=e.end_date        
+            ev["desc"]=e.desc
+            ev["venue"]=e.venue
+            ev["flyer"]=e.flyer
+            ev["website_url"]=e.website_url
+            ev["status"]=e.status
+            ev["uid"]=e.uid
+            ev["created_at"]=e.created_at
+            allev.append(ev)
         return jsonify(allev=allev),200  
     
 
